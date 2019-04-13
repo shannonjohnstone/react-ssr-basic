@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -61,7 +60,6 @@ typings/
 
 # next.js build output
 .next
-=======
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -74,6 +72,7 @@ typings/
 
 # production
 /build
+/server-build
 
 # misc
 .DS_Store
@@ -85,4 +84,3 @@ typings/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
->>>>>>> initial-ssr

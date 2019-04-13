@@ -6,6 +6,7 @@ import fs from 'fs'
 import express from 'express'
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
+import { StaticRouter } from 'react-router-dom'
 
 // UI application
 import App from '../src/App'
@@ -15,18 +16,38 @@ const PORT = 8080
 const app = express()
 const router = express.Router()
 
+const errorHandler = (err, req, res, next) => {
+  console.error(err.msg)
+
+  if (process.env.NODE === 'production') {
+    return res.status(500).end()
+  }
+
+  return res.status(500).json({ error: err, stack: err.stack })
+}
+
 // render server helper
 const serverRenderer = (req, res, next) => {
-  fs.readFile(path.resolve('./build/index.html'), 'utf8', (err, data) => {
+  const context = {}
+  const indexFile = path.resolve('./build/index.html');
+
+  const app = ReactDOMServer.renderToString(
+    <StaticRouter location={req.url} context={context}>
+      <App />
+    </StaticRouter>
+  )
+
+
+  fs.readFile(indexFile, 'utf8', (err, data) => {
     if (err) {
-      console.error(err, 'Read build file error')
-      return res.status(500).end()
+      err.msg = 'Read build file error'
+      return next(err)
     }
 
     return res.send(
       data.replace(
         '<div id="root"></div>',
-        `<div id="root">${ReactDOMServer.renderToString(<App />)}</div>`
+        `<div id="root">${app}</div>`
       )
     )
   })
@@ -39,6 +60,7 @@ router.use(
 )
 
 app.use(router)
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`SSR running on port ${PORT}`)
